@@ -19,6 +19,8 @@ public class PlayerManager : MonoBehaviour {
 	GameObject arrowObj;
 	GameObject playerUI;
 	GameObject enemyUI;
+	
+	CameraController camera;
 
 	public Predicate<PathTile> walkableTiles;
 
@@ -39,6 +41,8 @@ public class PlayerManager : MonoBehaviour {
 
 		enemyUI = GameObject.Find ("EnemyCombatUI");
 		enemyUI.SetActive(false);
+		
+		camera = GameObject.Find("Main Camera").GetComponent<CameraController>();
 
 		Vector3 arrowPos = new Vector3(0.0f,-5.0f,0.0f);
 		Quaternion rotation = Quaternion.Euler(45.0f, 180.0f, 0.0f);
@@ -78,6 +82,8 @@ public class PlayerManager : MonoBehaviour {
 		#region playerTurn
 		if(currentTurn == Turn.PlayerTurn)
 		{
+			camera.followEnemy = false;
+			
 			#region hotkeys
 			if (selectedObject) {
 				arrowObj.transform.position = new Vector3(selectedObject.transform.position.x, selectedObject.transform.position.y + 2.0f, selectedObject.transform.position.z+1.0f);
@@ -331,16 +337,21 @@ public class PlayerManager : MonoBehaviour {
 		#region enemyTurn
 		else //Enemy Turn
 		{
+			camera.followEnemy = true;
 			//find closest player, find path to player and stop 1 tile before. Attack player.
 //			for(int i = 0; i < allEnemies.Count; i++){
 //				allEnemies[i].target = allEnemies[i].FindClosestPlayer(allPlayers.ToArray()).GetComponent<PlayerController>().start;
 //			}
 			if(currentEnemy < allEnemies.Count)
 			{
+				allEnemies[currentEnemy].EnemyUpdate();
 				if(!enemyMoving)
 				{
 					enemyMoving = true;
 					selectedObject = allEnemies[currentEnemy].enemyObject;
+					
+					camera.selectedObject = this.selectedObject;
+					
 					allEnemies[currentEnemy].isWalkable = this.isWalkable;
 					allEnemies[currentEnemy].target = allEnemies[currentEnemy].FindClosestPlayer(allPlayers.ToArray()).GetComponent<PlayerController>().start;
 				}
@@ -352,6 +363,7 @@ public class PlayerManager : MonoBehaviour {
 						currentEnemy++;
 					}
 				}
+
 			}
 			//If all enemies are inactive, end turn
 			else if(InactiveEnemies(allEnemies))
@@ -378,9 +390,9 @@ public class PlayerManager : MonoBehaviour {
 			}
 		}
 		else if(currentTurn == Turn.EnemyTurn){
-			foreach( Enemy e in allEnemies){
-				e.EnemyUpdate();
-			}
+			//foreach( Enemy e in allEnemies){
+			//	e.EnemyUpdate();
+			//}
 		}
 
 	}

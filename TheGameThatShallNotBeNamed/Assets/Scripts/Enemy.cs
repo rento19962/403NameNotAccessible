@@ -8,15 +8,18 @@ public class Enemy : Character {
 	public PathTile target = null;
 	public Predicate<PathTile> isWalkable;
 	public GameObject enemyObject;
+	[SerializeField]
 	protected PlayerController pTarget = null;
 
     public string drop;     //The item the enemy drops
 
+	public List<PathTile> debugTileList;
+
     // Use this for initialization
     void Start () {
 		active = true;
-		maxActionPoints = 10;
-		currentActionPoints = maxActionPoints;
+		//maxActionPoints = 10;
+		//currentActionPoints = maxActionPoints;
 		enemyObject = this.gameObject;
 
 		//health = 25;
@@ -54,7 +57,7 @@ public class Enemy : Character {
 		if (start && target) {
 			tileMap.FindPath(start, target, tileList, isWalkable);
 			//tileMap.FindPath(start, target, tileList);
-			if(tileList.Count > range){
+			if(tileList.Count > range + 1){
 				List<PathTile> newPath = new List<PathTile>();
 				for(int i = 0; i < tileList.Count -1; i++){
 					newPath.Add(tileList[i]);
@@ -62,7 +65,10 @@ public class Enemy : Character {
 				tileList = newPath;
 					
 				if(tileList.Count > 0)
+				{
+					debugTileList = new List<PathTile>(tileList);
 					end = tileList[tileList.Count-1];
+				}
 
 				Move();
 			}
